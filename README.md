@@ -17,6 +17,17 @@ Then open http://localhost:5173
 
 ---
 
+## Testing
+
+```bash
+npm test        # run the suite once
+npm run test:watch
+```
+
+Uses Vitest + React Testing Library (jsdom environment). Setup lives in `src/test/setup.js`; test files sit alongside the code they cover (`*.test.js` / `*.test.jsx`).
+
+---
+
 ## Push to GitHub (one-time setup)
 
 ```bash
