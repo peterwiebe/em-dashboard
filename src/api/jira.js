@@ -1,4 +1,4 @@
-import { MOCK_JIRA } from "../data/mockData";
+import { MOCK_JIRA, MOCK_MY_TASKS } from "../data/mockData";
 
 const DOMAIN = import.meta.env.VITE_JIRA_DOMAIN;  // e.g. "yourcompany.atlassian.net"
 const EMAIL  = import.meta.env.VITE_JIRA_EMAIL;
@@ -37,4 +37,37 @@ export async function fetchSprintTickets() {
     });
   }
   return board;
+}
+
+// Outward "Blocks" links = tickets that *this* issue blocks (used to rank
+// tasks that are holding up a report or collaborator ahead of the person's
+// own deadline-only work).
+export function extractBlockedKeys(issuelinks = []) {
+  return issuelinks
+    .filter(link => link.type?.name === "Blocks" && link.outwardIssue)
+    .map(link => link.outwardIssue.key);
+}
+
+export function mapIssueToMyTask(issue) {
+  return {
+    id:      issue.key,
+    title:   issue.fields.summary,
+    status:  STATUS_MAP[issue.fields.status.name] ?? "backlog",
+    dueDate: issue.fields.duedate ?? null,
+    blocks:  extractBlockedKeys(issue.fields.issuelinks),
+  };
+}
+
+export async function fetchMyTasks() {
+  if (!DOMAIN || !EMAIL || !TOKEN) return MOCK_MY_TASKS;
+
+  const jql = encodeURIComponent(`project=${PROJECT} AND assignee = currentUser() AND resolution = Unresolved ORDER BY duedate ASC`);
+  const res = await fetch(
+    `https://${DOMAIN}/rest/api/3/search?jql=${jql}&fields=summary,status,duedate,issuelinks&maxResults=50`,
+    { headers: { Authorization: `Basic ${basicAuth()}`, Accept: "application/json" } }
+  );
+  if (!res.ok) throw new Error(`Jira API error: ${res.status}`);
+  const { issues } = await res.json();
+
+  return issues.map(mapIssueToMyTask);
 }
