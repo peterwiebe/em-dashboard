@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MOCK_PRS, MOCK_JIRA } from "./data/mockData";
-import ConfigBanner from "./components/ConfigBanner";
+import { load } from "./api/localState";
 import StatSummary from "./components/StatSummary";
 import TeamPulse from "./components/TeamPulse";
 import TodayMeetingStrip from "./components/TodayMeetingStrip";
@@ -12,13 +12,23 @@ import PTOCalendar from "./components/PTOCalendar";
 import ConfluenceDocs from "./components/ConfluenceDocs";
 import PriorityTaskList from "./components/PriorityTaskList";
 import UnansweredList from "./components/UnansweredList";
+import ReportsManager from "./components/ReportsManager";
+import Onboarding from "./components/Onboarding";
 
-const TABS = ["Overview", "Calendar", "Pull Requests", "Sprint Board", "Team", "PTO Calendar", "Docs", "My Tasks"];
+const TABS = ["Overview", "Calendar", "Pull Requests", "Sprint Board", "Team", "Reports", "PTO Calendar", "Docs", "My Tasks"];
 
 export default function EMDashboard() {
   const [tab, setTab] = useState("Overview");
-  const [showConfig, setShowConfig] = useState(true);
+  const [onboardingComplete, setOnboardingComplete] = useState(null); // null = not yet loaded
   const now = new Date().toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric" });
+
+  useEffect(() => {
+    let cancelled = false;
+    load().then(state => {
+      if (!cancelled) setOnboardingComplete(Boolean(state.onboardingComplete));
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="shell">
@@ -37,8 +47,6 @@ export default function EMDashboard() {
       </nav>
 
       <main className="main">
-        {showConfig && <ConfigBanner onDismiss={() => setShowConfig(false)} />}
-
         {tab === "Overview" && (
           <>
             <StatSummary prs={MOCK_PRS} />
@@ -102,6 +110,13 @@ export default function EMDashboard() {
           </div>
         )}
 
+        {tab === "Reports" && (
+          <div className="card">
+            <div className="card-header"><div className="card-title"><span className="card-title-icon">🧑‍🤝‍🧑</span> Direct Reports</div></div>
+            <div className="card-body"><ReportsManager /></div>
+          </div>
+        )}
+
         {tab === "PTO Calendar" && (
           <div className="card">
             <div className="card-header"><div className="card-title"><span className="card-title-icon">📅</span> Team PTO — This Week</div></div>
@@ -123,6 +138,8 @@ export default function EMDashboard() {
           </div>
         )}
       </main>
+
+      {onboardingComplete === false && <Onboarding onComplete={() => setOnboardingComplete(true)} />}
     </div>
   );
 }
