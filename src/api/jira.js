@@ -71,3 +71,37 @@ export async function fetchMyTasks() {
 
   return issues.map(mapIssueToMyTask);
 }
+
+// Changelog "values" entries are returned oldest-first; a ticket can cycle
+// through "In Progress" more than once (e.g. paused and resumed), so this
+// scans all of them and keeps the most recent, rather than the first match.
+export function findLastInProgressTransition(changelogValues = []) {
+  let latest = null;
+  for (const entry of changelogValues) {
+    const statusChange = entry.items?.find(
+      item => item.field === "status" && item.toString === "In Progress"
+    );
+    if (!statusChange) continue;
+    const createdAt = new Date(entry.created);
+    if (!latest || createdAt > latest) latest = createdAt;
+  }
+  return latest ? latest.toISOString() : null;
+}
+
+// Returns the ISO timestamp of the most recent "In Progress" transition for
+// a ticket, or null if there isn't one (or no Jira token is configured — mock
+// mode has no per-ticket changelog history to draw from, so this returns
+// null rather than fake data; callers should render nothing, same as a
+// fetch failure, per spec R-8's documented limitation).
+export async function fetchIssueChangelog(issueKey) {
+  if (!DOMAIN || !EMAIL || !TOKEN) return null;
+
+  const res = await fetch(
+    `https://${DOMAIN}/rest/api/3/issue/${issueKey}/changelog?maxResults=100`,
+    { headers: { Authorization: `Basic ${basicAuth()}`, Accept: "application/json" } }
+  );
+  if (!res.ok) throw new Error(`Jira API error: ${res.status}`);
+  const { values } = await res.json();
+
+  return findLastInProgressTransition(values);
+}
