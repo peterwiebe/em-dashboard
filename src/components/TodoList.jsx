@@ -1,16 +1,48 @@
-import { useState } from "react";
-import { DEFAULT_TODOS } from "../data/mockData";
+import { useEffect, useState } from "react";
+import { load, save } from "../api/localState";
 
 export default function TodoList() {
-  const [todos, setTodos] = useState(DEFAULT_TODOS);
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [priority, setPriority] = useState("med");
 
+  useEffect(() => {
+    let cancelled = false;
+    load().then(state => {
+      if (!cancelled) {
+        setTodos(state.todos ?? []);
+        setLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Re-loads the full state right before saving, same pattern as
+  // ReportsManager, so a concurrent edit elsewhere in the app is less
+  // likely to get clobbered (persistence has no concurrency control).
+  async function persist(nextTodos) {
+    const state = await load();
+    await save({ ...state, todos: nextTodos });
+    setTodos(nextTodos);
+  }
+
   const add = () => {
     if (!input.trim()) return;
-    setTodos(t => [{ id:Date.now(), text:input.trim(), done:false, priority }, ...t]);
+    const newTodo = { id: `${Date.now()}`, text: input.trim(), done: false, priority, blocksReportId: null };
+    persist([newTodo, ...todos]);
     setInput("");
   };
+
+  const toggleDone = (id) => {
+    persist(todos.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  };
+
+  const remove = (id) => {
+    persist(todos.filter(t => t.id !== id));
+  };
+
+  if (loading) return null;
 
   return (
     <>
@@ -38,13 +70,13 @@ export default function TodoList() {
           <div key={t.id} className="todo-item">
             <div
               className={`todo-check ${t.done?"done":""}`}
-              onClick={() => setTodos(ts => ts.map(x => x.id===t.id ? {...x,done:!x.done} : x))}
+              onClick={() => toggleDone(t.id)}
             >
               {t.done && <span style={{ color:"#000", fontSize:9, fontWeight:900 }}>✓</span>}
             </div>
             <span className={`todo-text ${t.done?"done":""}`}>{t.text}</span>
             <span className={`priority-tag p-${t.priority}`}>{t.priority}</span>
-            <button className="todo-delete" onClick={() => setTodos(ts => ts.filter(x => x.id!==t.id))}>×</button>
+            <button className="todo-delete" onClick={() => remove(t.id)}>×</button>
           </div>
         ))}
       </div>

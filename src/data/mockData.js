@@ -80,9 +80,9 @@ export const MOCK_CONFLUENCE = [
 ];
 
 export const DEFAULT_TODOS = [
-  { id:1, text:"Review DIG-440 PR from Arjun",               done:false, priority:"high" },
-  { id:2, text:"Prep sprint 45 planning agenda",             done:false, priority:"high" },
-  { id:3, text:"1:1 with Mia — discuss career goals",        done:false, priority:"med"  },
-  { id:4, text:"Finalize H2 roadmap slide for leadership",   done:true,  priority:"med"  },
-  { id:5, text:"Set up code review SLA policy doc",          done:false, priority:"low"  },
+  { id:"1", text:"Review DIG-440 PR from Arjun",               done:false, priority:"high", blocksReportId:null },
+  { id:"2", text:"Prep sprint 45 planning agenda",             done:false, priority:"high", blocksReportId:null },
+  { id:"3", text:"1:1 with Mia — discuss career goals",        done:false, priority:"med",  blocksReportId:null },
+  { id:"4", text:"Finalize H2 roadmap slide for leadership",   done:true,  priority:"med",  blocksReportId:null },
+  { id:"5", text:"Set up code review SLA policy doc",          done:false, priority:"low",  blocksReportId:null },
 ];
