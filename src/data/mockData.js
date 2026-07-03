@@ -58,6 +58,11 @@ export const MOCK_MY_TASKS = [
   { id:"DIG-452", title:"Approve partner API rate limit thresholds",       status:"in-progress", dueDate:null,         blocks:["DIG-435"] },
 ];
 
+export const MOCK_SLACK_UNREAD = [
+  { id: "D0123ABCD", source: "slack", title: "hey, did you get a chance to look at the partner API PR? kind of blocking me", from: "aisha-okonkwo", timestamp: "2026-07-03T08:45:00.000Z", link: "https://app.slack.com/client/T00000000/D0123ABCD" },
+  { id: "G0456EFGH", source: "slack", title: "reminder: sprint planning moved to 1pm today",                                  from: "#eng-team",     timestamp: "2026-07-03T07:30:00.000Z", link: "https://app.slack.com/client/T00000000/G0456EFGH" },
+];
+
 export const MOCK_CONFLUENCE = [
   { icon:"📐", title:"Digital Platform Architecture — Q3 Update", space:"Engineering",  author:"Arjun Patel",   updated:"2h ago"    },
   { icon:"🔌", title:"Partner API Onboarding Runbook v2",          space:"Integrations", author:"Aisha Okonkwo", updated:"Yesterday"  },
