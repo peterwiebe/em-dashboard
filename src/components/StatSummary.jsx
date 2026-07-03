@@ -1,10 +1,24 @@
-import { MOCK_MEETINGS, MOCK_JIRA, PTO_THIS_WEEK, TODAY_DAY_IDX } from "../data/mockData";
+import { useEffect, useState } from "react";
+import { MOCK_JIRA, PTO_THIS_WEEK, TODAY_DAY_IDX } from "../data/mockData";
+import { fetchWeekMeetings } from "../api/calendar";
+import { computeFocusTime } from "../utils/helpers";
 
 export default function StatSummary({ prs }) {
-  const stalePRs  = prs.filter(p => p.ageHours >= 72 && !p.draft).length;
-  const readyPRs  = prs.filter(p => p.reviewers.length > 0 && p.reviewers.every(r => r==="approved") && !p.draft).length;
-  const ptoCount  = Object.keys(PTO_THIS_WEEK).length;
-  const todayMtgs = MOCK_MEETINGS.filter(m => m.dayIdx === TODAY_DAY_IDX).length;
+  const [meetings, setMeetings] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchWeekMeetings().then(data => {
+      if (!cancelled) setMeetings(data);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const stalePRs   = prs.filter(p => p.ageHours >= 72 && !p.draft).length;
+  const readyPRs   = prs.filter(p => p.reviewers.length > 0 && p.reviewers.every(r => r==="approved") && !p.draft).length;
+  const ptoCount   = Object.keys(PTO_THIS_WEEK).length;
+  const todayMtgs  = meetings.filter(m => m.dayIdx === TODAY_DAY_IDX).length;
+  const focusHours = computeFocusTime(meetings, TODAY_DAY_IDX);
 
   return (
     <div className="stat-row" style={{ borderRadius:"var(--r)", overflow:"hidden", border:"1px solid var(--border)" }}>
@@ -14,6 +28,7 @@ export default function StatSummary({ prs }) {
       <div className="stat-cell"><div className="stat-label">On PTO</div><div className="stat-value">{ptoCount}</div></div>
       <div className="stat-cell"><div className="stat-label">In Progress</div><div className="stat-value">{MOCK_JIRA["in-progress"].length}</div></div>
       <div className="stat-cell"><div className="stat-label">Meetings Today</div><div className="stat-value amber">{todayMtgs}</div></div>
+      <div className="stat-cell"><div className="stat-label">Focus Time Today</div><div className="stat-value teal">{focusHours.toFixed(1)}h</div></div>
     </div>
   );
 }

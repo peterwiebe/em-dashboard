@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TODAY_DAY_IDX } from "../data/mockData";
 import { fetchWeekMeetings } from "../api/calendar";
-import { fmtHour, evTypeColor } from "../utils/helpers";
+import { fmtHour, evTypeColor, isStartingSoon } from "../utils/helpers";
 
 export default function TodayMeetingStrip() {
   const [meetings, setMeetings] = useState([]);
@@ -26,6 +26,8 @@ export default function TodayMeetingStrip() {
     return <div className="empty"><div className="empty-icon">🎉</div>No meetings today</div>;
   }
 
+  const now = new Date();
+
   return (
     <>
       {todayEvs.map(ev => (
@@ -33,6 +35,7 @@ export default function TodayMeetingStrip() {
           <div className="mini-dot" style={{ background: evTypeColor(ev.type) }} />
           <div className="mini-time">{fmtHour(ev.startH)}</div>
           <div className="mini-title">{ev.title}</div>
+          {isStartingSoon(ev, now) && <span className="badge badge-red">Starting soon</span>}
           {ev.location && <div className="mini-loc">📍 {ev.location}</div>}
         </div>
       ))}
