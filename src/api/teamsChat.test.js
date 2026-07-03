@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isChatUnread, mapChatToUnread, fetchTeamsUnread } from './teamsChat'
+import { isChatUnread, mapChatToUnread, fetchTeamsUnread, isConfigured } from './teamsChat'
 import { MOCK_TEAMS_UNREAD } from '../data/mockData'
 
 describe('isChatUnread', () => {
@@ -68,5 +68,11 @@ describe('fetchTeamsUnread', () => {
   it('falls back to mock data when no token is configured', async () => {
     const result = await fetchTeamsUnread()
     expect(result).toEqual(MOCK_TEAMS_UNREAD)
+  })
+})
+
+describe('isConfigured', () => {
+  it('is false when unconfigured', () => {
+    expect(isConfigured()).toBe(false)
   })
 })

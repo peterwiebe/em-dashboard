@@ -3,20 +3,27 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 
-vi.mock('./api/calendar', () => ({ fetchWeekMeetings: vi.fn().mockResolvedValue([]) }))
+vi.mock('./api/calendar', () => ({ fetchWeekMeetings: vi.fn().mockResolvedValue([]), isConfigured: vi.fn().mockReturnValue(false) }))
 vi.mock('./api/jira', () => ({
   fetchMyTasks: vi.fn().mockResolvedValue([]),
   fetchSprintTickets: vi.fn().mockResolvedValue({}),
   fetchIssueChangelog: vi.fn().mockResolvedValue(null),
+  isConfigured: vi.fn().mockReturnValue(false),
 }))
-vi.mock('./api/github', () => ({ fetchReviewRequestedPRs: vi.fn().mockResolvedValue([]) }))
+vi.mock('./api/github', () => ({
+  fetchReviewRequestedPRs: vi.fn().mockResolvedValue([]),
+  isPullRequestsConfigured: vi.fn().mockReturnValue(false),
+  isReviewRequestConfigured: vi.fn().mockReturnValue(false),
+}))
 vi.mock('./api/localState', () => ({ load: vi.fn(), save: vi.fn() }))
-vi.mock('./api/slack', () => ({ fetchSlackUnread: vi.fn().mockResolvedValue([]) }))
-vi.mock('./api/teamsChat', () => ({ fetchTeamsUnread: vi.fn().mockResolvedValue([]) }))
-vi.mock('./api/outlookMail', () => ({ fetchUnreadMail: vi.fn().mockResolvedValue([]) }))
-vi.mock('./api/confluence', () => ({ fetchRecentDocs: vi.fn().mockResolvedValue([]) }))
+vi.mock('./api/slack', () => ({ fetchSlackUnread: vi.fn().mockResolvedValue([]), isConfigured: vi.fn().mockReturnValue(false) }))
+vi.mock('./api/teamsChat', () => ({ fetchTeamsUnread: vi.fn().mockResolvedValue([]), isConfigured: vi.fn().mockReturnValue(false) }))
+vi.mock('./api/outlookMail', () => ({ fetchUnreadMail: vi.fn().mockResolvedValue([]), isConfigured: vi.fn().mockReturnValue(false) }))
+vi.mock('./api/confluence', () => ({ fetchRecentDocs: vi.fn().mockResolvedValue([]), isConfigured: vi.fn().mockReturnValue(false) }))
 
 import { load, save } from './api/localState'
+import { isConfigured as isCalendarConfigured } from './api/calendar'
+import { isReviewRequestConfigured } from './api/github'
 
 const ONBOARDED_STATE = { reports: [], todos: [], priorityOverrides: {}, onboardingComplete: true }
 
@@ -129,5 +136,39 @@ describe('App — onboarding', () => {
 
     await waitFor(() => expect(screen.queryByText('Welcome to em.dashboard')).not.toBeInTheDocument())
     expect(screen.getByText("Today's Meetings")).toBeInTheDocument()
+  })
+})
+
+describe('App — mock-data badges', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    load.mockResolvedValue(ONBOARDED_STATE)
+    save.mockResolvedValue({})
+  })
+
+  it('shows a Mock data badge on Today\'s Meetings when calendar is unconfigured (the default in this test env)', async () => {
+    render(<App />)
+    await waitFor(() => expect(screen.getByText("Today's Meetings")).toBeInTheDocument())
+    expect(screen.getByText('Mock: Calendar')).toBeInTheDocument()
+  })
+
+  it('lists multiple unconfigured sources on Priority Tasks (Jira + GitHub both unconfigured)', async () => {
+    render(<App />)
+    await waitFor(() => expect(screen.getByText('Priority Tasks')).toBeInTheDocument())
+    expect(screen.getByText('Mock: Jira, GitHub')).toBeInTheDocument()
+  })
+
+  it('hides the badge once a source reports itself configured', async () => {
+    isCalendarConfigured.mockReturnValue(true)
+    render(<App />)
+    await waitFor(() => expect(screen.getByText("Today's Meetings")).toBeInTheDocument())
+    expect(screen.queryByText(/Mock: Calendar/)).not.toBeInTheDocument()
+  })
+
+  it('drops just the configured source from a multi-source badge', async () => {
+    isReviewRequestConfigured.mockReturnValue(true)
+    render(<App />)
+    await waitFor(() => expect(screen.getByText('Priority Tasks')).toBeInTheDocument())
+    expect(screen.getByText('Mock: Jira')).toBeInTheDocument()
   })
 })

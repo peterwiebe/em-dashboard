@@ -5,6 +5,10 @@ const EMAIL  = import.meta.env.VITE_CONFLUENCE_EMAIL;
 const TOKEN  = import.meta.env.VITE_CONFLUENCE_TOKEN;
 const SPACE  = import.meta.env.VITE_CONFLUENCE_SPACE ?? "ENG";
 
+export function isConfigured() {
+  return Boolean(DOMAIN && EMAIL && TOKEN);
+}
+
 function basicAuth() {
   return btoa(`${EMAIL}:${TOKEN}`);
 }

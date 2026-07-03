@@ -2,6 +2,10 @@ import { MOCK_UNREAD_MAIL } from "../data/mockData";
 
 const TOKEN = import.meta.env.VITE_MS_GRAPH_TOKEN; // same token calendar.js/teamsChat.js use
 
+export function isConfigured() {
+  return Boolean(TOKEN);
+}
+
 export function mapMessageToUnread(message) {
   return {
     id:        message.id,

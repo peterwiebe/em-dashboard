@@ -5,6 +5,10 @@ const EMAIL  = import.meta.env.VITE_JIRA_EMAIL;
 const TOKEN  = import.meta.env.VITE_JIRA_TOKEN;
 const PROJECT = import.meta.env.VITE_JIRA_PROJECT ?? "DIG";
 
+export function isConfigured() {
+  return Boolean(DOMAIN && EMAIL && TOKEN);
+}
+
 function basicAuth() {
   return btoa(`${EMAIL}:${TOKEN}`);
 }

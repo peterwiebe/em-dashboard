@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { extractBlockedKeys, mapIssueToMyTask, findLastInProgressTransition, fetchMyTasks, fetchSprintTickets, fetchIssueChangelog } from './jira'
+import { extractBlockedKeys, mapIssueToMyTask, findLastInProgressTransition, fetchMyTasks, fetchSprintTickets, fetchIssueChangelog, isConfigured } from './jira'
 import { MOCK_MY_TASKS, MOCK_JIRA } from '../data/mockData'
 
 describe('extractBlockedKeys', () => {
@@ -98,5 +98,9 @@ describe('mock fallback when unconfigured', () => {
 
   it('fetchIssueChangelog returns null rather than fake data', async () => {
     expect(await fetchIssueChangelog('DIG-440')).toBe(null)
+  })
+
+  it('isConfigured is false when unconfigured', () => {
+    expect(isConfigured()).toBe(false)
   })
 })

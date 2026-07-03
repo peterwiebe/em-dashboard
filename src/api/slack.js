@@ -2,6 +2,10 @@ import { MOCK_SLACK_UNREAD } from "../data/mockData";
 
 const TOKEN = import.meta.env.VITE_SLACK_TOKEN;
 
+export function isConfigured() {
+  return Boolean(TOKEN);
+}
+
 // Scoped to unread DMs and group DMs only (not full channel unread counts,
 // which are noisy — see spec Risks). True "@mention" detection would need
 // Slack's Events API (a persistent webhook subscription), which doesn't fit

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapMessageToUnread, fetchUnreadMail } from './outlookMail'
+import { mapMessageToUnread, fetchUnreadMail, isConfigured } from './outlookMail'
 import { MOCK_UNREAD_MAIL } from '../data/mockData'
 
 describe('mapMessageToUnread', () => {
@@ -48,5 +48,11 @@ describe('fetchUnreadMail', () => {
   it('falls back to mock data when no token is configured', async () => {
     const result = await fetchUnreadMail()
     expect(result).toEqual(MOCK_UNREAD_MAIL)
+  })
+})
+
+describe('isConfigured', () => {
+  it('is false when unconfigured', () => {
+    expect(isConfigured()).toBe(false)
   })
 })

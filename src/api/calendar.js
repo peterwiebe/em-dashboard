@@ -2,6 +2,10 @@ import { MOCK_MEETINGS } from "../data/mockData";
 
 const TOKEN = import.meta.env.VITE_MS_GRAPH_TOKEN;
 
+export function isConfigured() {
+  return Boolean(TOKEN);
+}
+
 function classifyMeeting(title) {
   const t = title.toLowerCase();
   if (t.includes("standup") || t.includes("stand-up")) return "standup";

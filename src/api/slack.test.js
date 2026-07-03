@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapConversationToUnread, fetchSlackUnread } from './slack'
+import { mapConversationToUnread, fetchSlackUnread, isConfigured } from './slack'
 import { MOCK_SLACK_UNREAD } from '../data/mockData'
 
 describe('mapConversationToUnread', () => {
@@ -50,5 +50,11 @@ describe('fetchSlackUnread', () => {
   it('falls back to mock data when no token is configured', async () => {
     const result = await fetchSlackUnread()
     expect(result).toEqual(MOCK_SLACK_UNREAD)
+  })
+})
+
+describe('isConfigured', () => {
+  it('is false when unconfigured', () => {
+    expect(isConfigured()).toBe(false)
   })
 })

@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { MOCK_PRS, MOCK_JIRA } from "./data/mockData";
 import { load } from "./api/localState";
+import { isConfigured as isCalendarConfigured } from "./api/calendar";
+import { isConfigured as isJiraConfigured } from "./api/jira";
+import { isPullRequestsConfigured, isReviewRequestConfigured } from "./api/github";
+import { isConfigured as isConfluenceConfigured } from "./api/confluence";
+import { isConfigured as isSlackConfigured } from "./api/slack";
+import { isConfigured as isTeamsConfigured } from "./api/teamsChat";
+import { isConfigured as isMailConfigured } from "./api/outlookMail";
 import StatSummary from "./components/StatSummary";
 import TeamPulse from "./components/TeamPulse";
 import TodayMeetingStrip from "./components/TodayMeetingStrip";
@@ -14,6 +21,7 @@ import PriorityTaskList from "./components/PriorityTaskList";
 import UnansweredList from "./components/UnansweredList";
 import ReportsManager from "./components/ReportsManager";
 import Onboarding from "./components/Onboarding";
+import MockDataBadge from "./components/MockDataBadge";
 
 const TABS = ["Overview", "Calendar", "Pull Requests", "Sprint Board", "Team", "Reports", "PTO Calendar", "Docs", "My Tasks"];
 
@@ -21,6 +29,15 @@ export default function EMDashboard() {
   const [tab, setTab] = useState("Overview");
   const [onboardingComplete, setOnboardingComplete] = useState(null); // null = not yet loaded
   const now = new Date().toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric" });
+
+  // Computed fresh each render from import.meta.env — synchronous, no
+  // fetch involved, so no loading state needed unlike the data itself.
+  const meetingsMockSources     = isCalendarConfigured() ? [] : ["Calendar"];
+  const pullRequestsMockSources = isPullRequestsConfigured() ? [] : ["GitHub"];
+  const sprintBoardMockSources  = isJiraConfigured() ? [] : ["Jira"];
+  const docsMockSources         = isConfluenceConfigured() ? [] : ["Confluence"];
+  const priorityTasksMockSources = [!isJiraConfigured() && "Jira", !isReviewRequestConfigured() && "GitHub"].filter(Boolean);
+  const unansweredMockSources    = [!isSlackConfigured() && "Slack", !isTeamsConfigured() && "Teams", !isMailConfigured() && "Mail"].filter(Boolean);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,18 +70,21 @@ export default function EMDashboard() {
             <div className="card">
               <div className="card-header">
                 <div className="card-title"><span className="card-title-icon">📆</span> Today's Meetings</div>
+                <MockDataBadge sources={meetingsMockSources} />
               </div>
               <div className="card-body"><TodayMeetingStrip /></div>
             </div>
             <div className="card">
               <div className="card-header">
                 <div className="card-title"><span className="card-title-icon">✅</span> Priority Tasks</div>
+                <MockDataBadge sources={priorityTasksMockSources} />
               </div>
               <div className="card-body"><PriorityTaskList /></div>
             </div>
             <div className="card">
               <div className="card-header">
                 <div className="card-title"><span className="card-title-icon">📭</span> Unanswered</div>
+                <MockDataBadge sources={unansweredMockSources} />
               </div>
               <div className="card-body"><UnansweredList /></div>
             </div>
@@ -78,6 +98,7 @@ export default function EMDashboard() {
             <div className="card-header">
               <div className="card-title"><span className="card-title-icon">🔀</span> All Pull Requests — sorted by staleness</div>
               <div style={{ display:"flex", gap:8 }}>
+                <MockDataBadge sources={pullRequestsMockSources} />
                 <span className="badge badge-red">{MOCK_PRS.filter(p => p.ageHours >= 168).length} critical</span>
                 <span className="badge badge-teal">{MOCK_PRS.filter(p => p.reviewers.every(r => r==="approved") && p.reviewers.length > 0).length} ready</span>
               </div>
@@ -97,7 +118,10 @@ export default function EMDashboard() {
           <div className="card">
             <div className="card-header">
               <div className="card-title"><span className="card-title-icon">🗂️</span> Sprint 44 — Jira</div>
-              <span className="badge badge-muted">{Object.values(MOCK_JIRA).flat().length} tickets</span>
+              <div style={{ display:"flex", gap:8 }}>
+                <MockDataBadge sources={sprintBoardMockSources} />
+                <span className="badge badge-muted">{Object.values(MOCK_JIRA).flat().length} tickets</span>
+              </div>
             </div>
             <div className="card-body"><SprintBoard /></div>
           </div>
@@ -126,7 +150,10 @@ export default function EMDashboard() {
 
         {tab === "Docs" && (
           <div className="card">
-            <div className="card-header"><div className="card-title"><span className="card-title-icon">📖</span> Recently Updated — Confluence</div></div>
+            <div className="card-header">
+              <div className="card-title"><span className="card-title-icon">📖</span> Recently Updated — Confluence</div>
+              <MockDataBadge sources={docsMockSources} />
+            </div>
             <div className="card-body"><ConfluenceDocs /></div>
           </div>
         )}

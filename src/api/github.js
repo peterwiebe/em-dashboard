@@ -5,6 +5,14 @@ const OWNER    = import.meta.env.VITE_GITHUB_OWNER;
 const REPO     = import.meta.env.VITE_GITHUB_REPO;
 const USERNAME = import.meta.env.VITE_GITHUB_USERNAME;
 
+export function isPullRequestsConfigured() {
+  return Boolean(TOKEN && OWNER && REPO);
+}
+
+export function isReviewRequestConfigured() {
+  return Boolean(TOKEN && USERNAME);
+}
+
 export async function fetchPullRequests() {
   if (!TOKEN || !OWNER || !REPO) return MOCK_PRS;
 

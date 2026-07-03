@@ -2,6 +2,10 @@ import { MOCK_TEAMS_UNREAD } from "../data/mockData";
 
 const TOKEN = import.meta.env.VITE_MS_GRAPH_TOKEN; // same token calendar.js uses
 
+export function isConfigured() {
+  return Boolean(TOKEN);
+}
+
 function stripHtml(html) {
   return html.replace(/<[^>]*>/g, "").trim();
 }

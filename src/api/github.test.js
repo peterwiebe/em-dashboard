@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapSearchItemToPR, fetchReviewRequestedPRs } from './github'
+import { mapSearchItemToPR, fetchReviewRequestedPRs, isPullRequestsConfigured, isReviewRequestConfigured } from './github'
 import { MOCK_REVIEW_REQUESTED_PRS } from '../data/mockData'
 
 describe('mapSearchItemToPR', () => {
@@ -46,5 +46,12 @@ describe('fetchReviewRequestedPRs', () => {
   it('falls back to mock data when no token/username is configured', async () => {
     const result = await fetchReviewRequestedPRs()
     expect(result).toEqual(MOCK_REVIEW_REQUESTED_PRS)
+  })
+})
+
+describe('isPullRequestsConfigured / isReviewRequestConfigured', () => {
+  it('are both false when unconfigured', () => {
+    expect(isPullRequestsConfigured()).toBe(false)
+    expect(isReviewRequestConfigured()).toBe(false)
   })
 })
