@@ -6,7 +6,7 @@ import { DEFAULT_TODOS } from "../src/data/mockData.js";
 // exists on disk. Once the client saves anything (even an empty todos
 // array from deleting every seeded task), the real file takes over
 // permanently — this fallback never "re-seeds" a genuinely emptied list.
-export const DEFAULT_LOCAL_STATE = { reports: [], todos: DEFAULT_TODOS, priorityOverrides: {} };
+export const DEFAULT_LOCAL_STATE = { reports: [], todos: DEFAULT_TODOS, priorityOverrides: {}, onboardingComplete: false };
 
 async function readState(filePath) {
   try {
