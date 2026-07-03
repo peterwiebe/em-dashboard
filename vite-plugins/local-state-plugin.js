@@ -1,7 +1,12 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { DEFAULT_TODOS } from "../src/data/mockData.js";
 
-export const DEFAULT_LOCAL_STATE = { reports: [], todos: [], priorityOverrides: {} };
+// DEFAULT_TODOS only ever shows up here, before data/local-state.json
+// exists on disk. Once the client saves anything (even an empty todos
+// array from deleting every seeded task), the real file takes over
+// permanently — this fallback never "re-seeds" a genuinely emptied list.
+export const DEFAULT_LOCAL_STATE = { reports: [], todos: DEFAULT_TODOS, priorityOverrides: {} };
 
 async function readState(filePath) {
   try {
