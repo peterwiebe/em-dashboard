@@ -39,6 +39,12 @@ export const MOCK_PRS = [
   { id: 6, title: "refactor: extract shared auth middleware to platform package",   repo: "tour-digital/platform",        author: "Jordan Lee",     ageHours: 62,  reviewers: ["approved"],                     draft: false },
 ];
 
+export const MOCK_REVIEW_REQUESTED_PRS = [
+  { id: 101, title: "fix: leaderboard cache invalidation on tie-break updates", repo: "tour-digital/core-api",         author: "arjun-patel",   ageHours: 20, reviewers: [], draft: false },
+  { id: 102, title: "feat: partner API webhook retry policy",                   repo: "tour-digital/gateway",          author: "aisha-okonkwo", ageHours: 5,  reviewers: [], draft: false },
+  { id: 103, title: "chore: bump scoring-service deps",                         repo: "tour-digital/scoring-service",  author: "mia-chen",      ageHours: 68, reviewers: [], draft: true  },
+];
+
 export const MOCK_JIRA = {
   backlog:       [{ id:"DIG-441", title:"Localize leaderboard for APAC markets",      assignee:"Unassigned"    },{ id:"DIG-438", title:"Analytics event schema v3 migration", assignee:"Carlos Rivera" }],
   "in-progress": [{ id:"DIG-440", title:"Real-time scoring pipeline v2",              assignee:"Arjun Patel"   },{ id:"DIG-437", title:"Fan engagement push notifications",   assignee:"Mia Chen"      },{ id:"DIG-435", title:"Partner API rate limiting", assignee:"Aisha Okonkwo" }],
