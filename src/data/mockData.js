@@ -58,6 +58,10 @@ export const MOCK_MY_TASKS = [
   { id:"DIG-452", title:"Approve partner API rate limit thresholds",       status:"in-progress", dueDate:null,         blocks:["DIG-435"] },
 ];
 
+export const MOCK_UNREAD_MAIL = [
+  { id: "AAMkAGI1AAA=", source: "mail", title: "RE: Partner API rate limit thresholds — need your approval", from: "Aisha Okonkwo", timestamp: "2026-07-03T07:50:00.000Z", link: "https://outlook.office.com/mail/inbox/id/AAMkAGI1AAA%3D" },
+];
+
 export const MOCK_CONFLUENCE = [
   { icon:"📐", title:"Digital Platform Architecture — Q3 Update", space:"Engineering",  author:"Arjun Patel",   updated:"2h ago"    },
   { icon:"🔌", title:"Partner API Onboarding Runbook v2",          space:"Integrations", author:"Aisha Okonkwo", updated:"Yesterday"  },
