@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fmtHour, stalenessColor, computeFocusTime, isStartingSoon } from './helpers'
+import { fmtHour, stalenessColor, computeFocusTime, isStartingSoon, formatElapsed } from './helpers'
 
 describe('fmtHour', () => {
   it('formats whole hours in 12-hour am/pm form', () => {
@@ -87,5 +87,24 @@ describe('isStartingSoon', () => {
   it('returns true for a meeting starting exactly now', () => {
     const now = new Date('2026-07-03T09:00:00')
     expect(isStartingSoon({ startH: 9 }, now, 15)).toBe(true)
+  })
+})
+
+describe('formatElapsed', () => {
+  it('formats sub-hour durations in minutes only', () => {
+    expect(formatElapsed(45 * 60_000)).toBe('45m')
+    expect(formatElapsed(0)).toBe('0m')
+  })
+
+  it('formats sub-day durations in hours and minutes', () => {
+    expect(formatElapsed((2 * 60 + 15) * 60_000)).toBe('2h 15m')
+  })
+
+  it('formats multi-day durations in days and hours', () => {
+    expect(formatElapsed((26 * 60) * 60_000)).toBe('1d 2h')
+  })
+
+  it('floors negative durations at 0 rather than showing a negative time', () => {
+    expect(formatElapsed(-5000)).toBe('0m')
   })
 })
