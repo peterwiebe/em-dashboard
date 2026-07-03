@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MOCK_PRS, MOCK_JIRA, MOCK_MEETINGS, TODAY_DAY_IDX } from "./data/mockData";
+import { MOCK_PRS, MOCK_JIRA } from "./data/mockData";
 import ConfigBanner from "./components/ConfigBanner";
 import StatSummary from "./components/StatSummary";
 import TeamPulse from "./components/TeamPulse";
@@ -10,8 +10,10 @@ import SprintBoard from "./components/SprintBoard";
 import MeetingCalendar from "./components/MeetingCalendar";
 import PTOCalendar from "./components/PTOCalendar";
 import ConfluenceDocs from "./components/ConfluenceDocs";
+import PriorityTaskList from "./components/PriorityTaskList";
+import UnansweredList from "./components/UnansweredList";
 
-const TABS = ["Overview", "Calendar", "Pull Requests", "Sprint Board", "PTO Calendar", "Docs", "My Tasks"];
+const TABS = ["Overview", "Calendar", "Pull Requests", "Sprint Board", "Team", "PTO Calendar", "Docs", "My Tasks"];
 
 export default function EMDashboard() {
   const [tab, setTab] = useState("Overview");
@@ -40,43 +42,23 @@ export default function EMDashboard() {
         {tab === "Overview" && (
           <>
             <StatSummary prs={MOCK_PRS} />
-            <div className="grid-2">
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title"><span className="card-title-icon">👥</span> Team Pulse</div>
-                  <span className="badge badge-teal">{/* available count */}3 available</span>
-                </div>
-                <div className="card-body"><TeamPulse /></div>
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title"><span className="card-title-icon">📆</span> Today's Meetings</div>
               </div>
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title"><span className="card-title-icon">📆</span> Today's Meetings</div>
-                  <span className="badge badge-blue">{MOCK_MEETINGS.filter(m => m.dayIdx === TODAY_DAY_IDX).length} meetings</span>
-                </div>
-                <div className="card-body"><TodayMeetingStrip /></div>
-              </div>
-            </div>
-            <div className="grid-2">
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title"><span className="card-title-icon">🔀</span> Stalest PRs</div>
-                  <span className="badge badge-red">{MOCK_PRS.filter(p => p.ageHours >= 72).length} stale</span>
-                </div>
-                <div className="card-body"><PRList prs={MOCK_PRS.slice(0,4)} /></div>
-              </div>
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title"><span className="card-title-icon">✅</span> My Tasks</div>
-                </div>
-                <div className="card-body"><TodoList /></div>
-              </div>
+              <div className="card-body"><TodayMeetingStrip /></div>
             </div>
             <div className="card">
               <div className="card-header">
-                <div className="card-title"><span className="card-title-icon">🗂️</span> Sprint Board</div>
-                <span className="badge badge-muted">Sprint 44</span>
+                <div className="card-title"><span className="card-title-icon">✅</span> Priority Tasks</div>
               </div>
-              <div className="card-body"><SprintBoard /></div>
+              <div className="card-body"><PriorityTaskList /></div>
+            </div>
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title"><span className="card-title-icon">📭</span> Unanswered</div>
+              </div>
+              <div className="card-body"><UnansweredList /></div>
             </div>
           </>
         )}
@@ -110,6 +92,13 @@ export default function EMDashboard() {
               <span className="badge badge-muted">{Object.values(MOCK_JIRA).flat().length} tickets</span>
             </div>
             <div className="card-body"><SprintBoard /></div>
+          </div>
+        )}
+
+        {tab === "Team" && (
+          <div className="card">
+            <div className="card-header"><div className="card-title"><span className="card-title-icon">👥</span> Team Pulse</div></div>
+            <div className="card-body"><TeamPulse /></div>
           </div>
         )}
 
