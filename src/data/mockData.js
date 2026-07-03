@@ -46,6 +46,12 @@ export const MOCK_JIRA = {
   done:          [{ id:"DIG-428", title:"CI pipeline parallelization",                 assignee:"Jordan Lee"    },{ id:"DIG-425", title:"Auth token refresh hardening",        assignee:"Arjun Patel"   },{ id:"DIG-423", title:"CDN cache-busting strategy", assignee:"Mia Chen" }],
 };
 
+export const MOCK_MY_TASKS = [
+  { id:"DIG-450", title:"Fix scoring pipeline race condition regression", status:"in-progress", dueDate:"2026-07-03", blocks:["DIG-437"] },
+  { id:"DIG-451", title:"Review OWGR data integration approach doc",       status:"backlog",     dueDate:"2026-07-08", blocks:[] },
+  { id:"DIG-452", title:"Approve partner API rate limit thresholds",       status:"in-progress", dueDate:null,         blocks:["DIG-435"] },
+];
+
 export const MOCK_CONFLUENCE = [
   { icon:"📐", title:"Digital Platform Architecture — Q3 Update", space:"Engineering",  author:"Arjun Patel",   updated:"2h ago"    },
   { icon:"🔌", title:"Partner API Onboarding Runbook v2",          space:"Integrations", author:"Aisha Okonkwo", updated:"Yesterday"  },
