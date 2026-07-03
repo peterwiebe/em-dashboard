@@ -63,6 +63,10 @@ export const MOCK_SLACK_UNREAD = [
   { id: "G0456EFGH", source: "slack", title: "reminder: sprint planning moved to 1pm today",                                  from: "#eng-team",     timestamp: "2026-07-03T07:30:00.000Z", link: "https://app.slack.com/client/T00000000/G0456EFGH" },
 ];
 
+export const MOCK_TEAMS_UNREAD = [
+  { id: "19:abc123def456", source: "teams", title: "quick sync before the all-hands?", from: "Arjun Patel", timestamp: "2026-07-03T08:15:00.000Z", link: "https://teams.microsoft.com/l/chat/19%3Aabc123def456" },
+];
+
 export const MOCK_CONFLUENCE = [
   { icon:"📐", title:"Digital Platform Architecture — Q3 Update", space:"Engineering",  author:"Arjun Patel",   updated:"2h ago"    },
   { icon:"🔌", title:"Partner API Onboarding Runbook v2",          space:"Integrations", author:"Aisha Okonkwo", updated:"Yesterday"  },
