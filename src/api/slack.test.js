@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { mapConversationToUnread } from './slack'
+import { mapConversationToUnread, fetchSlackUnread } from './slack'
+import { MOCK_SLACK_UNREAD } from '../data/mockData'
 
 describe('mapConversationToUnread', () => {
   it('maps a DM conversation with a latest message to the normalized shape', () => {
@@ -42,5 +43,12 @@ describe('mapConversationToUnread', () => {
     const conversation = { id: 'D3' }
     const result = mapConversationToUnread(conversation, undefined)
     expect(result.from).toBe('unknown')
+  })
+})
+
+describe('fetchSlackUnread', () => {
+  it('falls back to mock data when no token is configured', async () => {
+    const result = await fetchSlackUnread()
+    expect(result).toEqual(MOCK_SLACK_UNREAD)
   })
 })

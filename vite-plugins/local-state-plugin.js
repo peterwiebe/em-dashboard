@@ -23,38 +23,43 @@ async function readBody(req) {
   return Buffer.concat(chunks).toString("utf-8");
 }
 
+// Extracted so it can be unit-tested directly against a temp file, without
+// spinning up a real Vite dev server or Connect middleware stack.
+export function createStateMiddleware(filePath) {
+  return async function stateMiddleware(req, res) {
+    if (req.method === "GET") {
+      const state = await readState(filePath);
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(state));
+      return;
+    }
+
+    if (req.method === "PUT") {
+      try {
+        const state = JSON.parse(await readBody(req));
+        await fs.mkdir(path.dirname(filePath), { recursive: true });
+        await fs.writeFile(filePath, JSON.stringify(state, null, 2));
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify(state));
+      } catch (err) {
+        res.statusCode = 400;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
+    }
+
+    res.statusCode = 405;
+    res.end();
+  };
+}
+
 export default function localStatePlugin() {
   return {
     name: "local-state-plugin",
     configureServer(server) {
       const filePath = path.resolve(server.config.root, "data", "local-state.json");
-
-      server.middlewares.use("/api/state", async (req, res) => {
-        if (req.method === "GET") {
-          const state = await readState(filePath);
-          res.setHeader("Content-Type", "application/json");
-          res.end(JSON.stringify(state));
-          return;
-        }
-
-        if (req.method === "PUT") {
-          try {
-            const state = JSON.parse(await readBody(req));
-            await fs.mkdir(path.dirname(filePath), { recursive: true });
-            await fs.writeFile(filePath, JSON.stringify(state, null, 2));
-            res.setHeader("Content-Type", "application/json");
-            res.end(JSON.stringify(state));
-          } catch (err) {
-            res.statusCode = 400;
-            res.setHeader("Content-Type", "application/json");
-            res.end(JSON.stringify({ error: err.message }));
-          }
-          return;
-        }
-
-        res.statusCode = 405;
-        res.end();
-      });
+      server.middlewares.use("/api/state", createStateMiddleware(filePath));
     },
   };
 }

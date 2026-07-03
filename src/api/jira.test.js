@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { extractBlockedKeys, mapIssueToMyTask, findLastInProgressTransition } from './jira'
+import { extractBlockedKeys, mapIssueToMyTask, findLastInProgressTransition, fetchMyTasks, fetchSprintTickets, fetchIssueChangelog } from './jira'
+import { MOCK_MY_TASKS, MOCK_JIRA } from '../data/mockData'
 
 describe('extractBlockedKeys', () => {
   it('extracts only outward "Blocks" links, ignoring inward links and other link types', () => {
@@ -83,5 +84,19 @@ describe('findLastInProgressTransition', () => {
   it('returns null for an empty changelog', () => {
     expect(findLastInProgressTransition([])).toBe(null)
     expect(findLastInProgressTransition(undefined)).toBe(null)
+  })
+})
+
+describe('mock fallback when unconfigured', () => {
+  it('fetchMyTasks falls back to mock data', async () => {
+    expect(await fetchMyTasks()).toEqual(MOCK_MY_TASKS)
+  })
+
+  it('fetchSprintTickets falls back to mock data', async () => {
+    expect(await fetchSprintTickets()).toEqual(MOCK_JIRA)
+  })
+
+  it('fetchIssueChangelog returns null rather than fake data', async () => {
+    expect(await fetchIssueChangelog('DIG-440')).toBe(null)
   })
 })
