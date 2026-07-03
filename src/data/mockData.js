@@ -67,6 +67,10 @@ export const MOCK_TEAMS_UNREAD = [
   { id: "19:abc123def456", source: "teams", title: "quick sync before the all-hands?", from: "Arjun Patel", timestamp: "2026-07-03T08:15:00.000Z", link: "https://teams.microsoft.com/l/chat/19%3Aabc123def456" },
 ];
 
+export const MOCK_UNREAD_MAIL = [
+  { id: "AAMkAGI1AAA=", source: "mail", title: "RE: Partner API rate limit thresholds — need your approval", from: "Aisha Okonkwo", timestamp: "2026-07-03T07:50:00.000Z", link: "https://outlook.office.com/mail/inbox/id/AAMkAGI1AAA%3D" },
+];
+
 export const MOCK_CONFLUENCE = [
   { icon:"📐", title:"Digital Platform Architecture — Q3 Update", space:"Engineering",  author:"Arjun Patel",   updated:"2h ago"    },
   { icon:"🔌", title:"Partner API Onboarding Runbook v2",          space:"Integrations", author:"Aisha Okonkwo", updated:"Yesterday"  },
