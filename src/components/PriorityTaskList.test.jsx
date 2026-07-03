@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import PriorityTaskList, {
   buildAssigneeMap,
@@ -8,11 +8,11 @@ import PriorityTaskList, {
   normalizeAdminTodo,
 } from './PriorityTaskList'
 
-vi.mock('../api/jira', () => ({ fetchMyTasks: vi.fn(), fetchSprintTickets: vi.fn() }))
+vi.mock('../api/jira', () => ({ fetchMyTasks: vi.fn(), fetchSprintTickets: vi.fn(), fetchIssueChangelog: vi.fn() }))
 vi.mock('../api/github', () => ({ fetchReviewRequestedPRs: vi.fn() }))
 vi.mock('../api/localState', () => ({ load: vi.fn() }))
 
-import { fetchMyTasks, fetchSprintTickets } from '../api/jira'
+import { fetchMyTasks, fetchSprintTickets, fetchIssueChangelog } from '../api/jira'
 import { fetchReviewRequestedPRs } from '../api/github'
 import { load } from '../api/localState'
 
@@ -81,6 +81,10 @@ describe('normalizeAdminTodo', () => {
 })
 
 describe('PriorityTaskList', () => {
+  beforeEach(() => {
+    fetchIssueChangelog.mockReset().mockResolvedValue(null)
+  })
+
   it('ranks a combined list of Jira/GitHub/admin items by blocking tier then deadline', async () => {
     fetchMyTasks.mockResolvedValue([
       { id: 'DIG-1', title: 'No blocking, far deadline', dueDate: '2026-08-01', blocks: [] },
@@ -118,5 +122,65 @@ describe('PriorityTaskList', () => {
 
     render(<PriorityTaskList />)
     await waitFor(() => expect(screen.getByText('Nothing on your plate right now')).toBeInTheDocument())
+  })
+
+  it('shows elapsed time on a top-ranked Jira task when the changelog fetch succeeds', async () => {
+    fetchMyTasks.mockResolvedValue([
+      { id: 'DIG-1', title: 'In-progress Jira task', dueDate: '2026-07-05', blocks: [] },
+    ])
+    fetchSprintTickets.mockResolvedValue({})
+    fetchReviewRequestedPRs.mockResolvedValue([])
+    load.mockResolvedValue({ reports: [], todos: [], priorityOverrides: {} })
+    fetchIssueChangelog.mockResolvedValue(new Date(Date.now() - 90 * 60_000).toISOString()) // 1h30m ago
+
+    render(<PriorityTaskList />)
+
+    await waitFor(() => expect(screen.getByText(/1h 30m/)).toBeInTheDocument())
+    expect(fetchIssueChangelog).toHaveBeenCalledWith('DIG-1')
+  })
+
+  it('does not fetch changelog for GitHub/admin rows, and shows nothing (not an error) when the fetch fails', async () => {
+    fetchMyTasks.mockResolvedValue([
+      { id: 'DIG-1', title: 'Failing changelog task', dueDate: '2026-07-05', blocks: [] },
+    ])
+    fetchSprintTickets.mockResolvedValue({})
+    fetchReviewRequestedPRs.mockResolvedValue([
+      { id: 1, title: 'A PR', repo: 'x', author: 'someone' },
+    ])
+    load.mockResolvedValue({
+      reports: [],
+      todos: [{ id: 't1', text: 'An admin task', done: false, priority: 'low', blocksReportId: null }],
+      priorityOverrides: {},
+    })
+    fetchIssueChangelog.mockRejectedValue(new Error('Jira API error: 500'))
+
+    render(<PriorityTaskList />)
+
+    await waitFor(() => expect(screen.getByText('Failing changelog task')).toBeInTheDocument())
+    expect(screen.getByText('A PR')).toBeInTheDocument()
+    expect(screen.getByText('An admin task')).toBeInTheDocument()
+    // Only the Jira row should have ever triggered a changelog fetch.
+    expect(fetchIssueChangelog).toHaveBeenCalledTimes(1)
+    expect(fetchIssueChangelog).toHaveBeenCalledWith('DIG-1')
+    // A failed fetch renders no elapsed-time text at all (⏱ prefix absent).
+    expect(screen.queryByTitle('Time in progress')).not.toBeInTheDocument()
+  })
+
+  it('only fetches changelog for the top 3 ranked rows, even with more Jira tasks than that', async () => {
+    fetchMyTasks.mockResolvedValue([
+      { id: 'DIG-1', title: 'Task 1', dueDate: '2026-07-01', blocks: [] },
+      { id: 'DIG-2', title: 'Task 2', dueDate: '2026-07-02', blocks: [] },
+      { id: 'DIG-3', title: 'Task 3', dueDate: '2026-07-03', blocks: [] },
+      { id: 'DIG-4', title: 'Task 4', dueDate: '2026-07-04', blocks: [] },
+    ])
+    fetchSprintTickets.mockResolvedValue({})
+    fetchReviewRequestedPRs.mockResolvedValue([])
+    load.mockResolvedValue({ reports: [], todos: [], priorityOverrides: {} })
+
+    render(<PriorityTaskList />)
+
+    await waitFor(() => expect(screen.getByText('Task 4')).toBeInTheDocument())
+    expect(fetchIssueChangelog).toHaveBeenCalledTimes(3)
+    expect(fetchIssueChangelog).not.toHaveBeenCalledWith('DIG-4')
   })
 })
