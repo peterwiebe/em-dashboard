@@ -1,8 +1,26 @@
-import { MOCK_MEETINGS, TODAY_DAY_IDX } from "../data/mockData";
+import { useEffect, useState } from "react";
+import { TODAY_DAY_IDX } from "../data/mockData";
+import { fetchWeekMeetings } from "../api/calendar";
 import { fmtHour, evTypeColor } from "../utils/helpers";
 
 export default function TodayMeetingStrip() {
-  const todayEvs = MOCK_MEETINGS.filter(m => m.dayIdx === TODAY_DAY_IDX).sort((a,b) => a.startH - b.startH);
+  const [meetings, setMeetings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchWeekMeetings().then(data => {
+      if (!cancelled) {
+        setMeetings(data);
+        setLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) return null;
+
+  const todayEvs = meetings.filter(m => m.dayIdx === TODAY_DAY_IDX).sort((a,b) => a.startH - b.startH);
 
   if (todayEvs.length === 0) {
     return <div className="empty"><div className="empty-icon">🎉</div>No meetings today</div>;
