@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MOCK_MEETINGS, TODAY_DAY_IDX } from "../data/mockData";
+import { useEffect, useState } from "react";
+import { fetchWeekMeetings } from "../api/calendar";
 import { getWeekDays, fmtHour, evTypeColor } from "../utils/helpers";
 
 const HOUR_PX = 48;
@@ -8,6 +8,15 @@ export default function MeetingCalendar() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [view, setView] = useState("week");
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [meetings, setMeetings] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchWeekMeetings(weekOffset).then(data => {
+      if (!cancelled) setMeetings(data);
+    });
+    return () => { cancelled = true; };
+  }, [weekOffset]);
 
   const days = getWeekDays(weekOffset);
   const todayMonthDay = new Date().getDate();
@@ -60,7 +69,7 @@ export default function MeetingCalendar() {
                 <div className="mcal-day-cells" style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", flex:1, borderLeft:"1px solid var(--border)" }}>
                   {days.map(d => {
                     const isToday = d.date === todayMonthDay && d.month === todayMonth && isThisWeek;
-                    const eventsInSlot = MOCK_MEETINGS.filter(m => m.dayIdx === d.idx && Math.floor(m.startH) === h);
+                    const eventsInSlot = meetings.filter(m => m.dayIdx === d.idx && Math.floor(m.startH) === h);
                     return (
                       <div key={d.idx} className={`mcal-cell ${isToday?"is-today":""}`} style={{ position:"relative", height:HOUR_PX }}>
                         {isToday && h === Math.floor(nowH) && isThisWeek && (
@@ -95,7 +104,7 @@ export default function MeetingCalendar() {
         <div style={{ maxHeight:560, overflowY:"auto" }}>
           {days.map(d => {
             const isToday = d.date === todayMonthDay && d.month === todayMonth && isThisWeek;
-            const dayEvs  = MOCK_MEETINGS.filter(m => m.dayIdx === d.idx).sort((a,b) => a.startH - b.startH);
+            const dayEvs  = meetings.filter(m => m.dayIdx === d.idx).sort((a,b) => a.startH - b.startH);
             return (
               <div key={d.idx}>
                 <div style={{
