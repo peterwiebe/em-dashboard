@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { isChatUnread, mapChatToUnread } from './teamsChat'
+import { isChatUnread, mapChatToUnread, fetchTeamsUnread } from './teamsChat'
+import { MOCK_TEAMS_UNREAD } from '../data/mockData'
 
 describe('isChatUnread', () => {
   it('is unread when there is no viewpoint (never read)', () => {
@@ -60,5 +61,12 @@ describe('mapChatToUnread', () => {
     expect(result.title).toBe('(no preview available)')
     expect(result.timestamp).toBe(null)
     expect(result.from).toBe('unknown')
+  })
+})
+
+describe('fetchTeamsUnread', () => {
+  it('falls back to mock data when no token is configured', async () => {
+    const result = await fetchTeamsUnread()
+    expect(result).toEqual(MOCK_TEAMS_UNREAD)
   })
 })
